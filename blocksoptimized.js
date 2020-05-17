@@ -44,7 +44,6 @@
     }
 
     // define unit and zero vectors
-
     var unitIVector = new Vector(1, 0, 0);
     var unitJVector = new Vector(0, 1, 0);
     var unitKVector = new Vector(0, 0, 1);
@@ -219,9 +218,8 @@
         collisionCheck(segments) {
 
             // compile indices of blocks to check
-            var checkIndices = walls.slice();
-            var checkIndices = checkIndices.concat(segments[this.segment], segments[this.segment-1], segments[this.segment+1], segments[this.segment+xSegments], segments[this.segment-xSegments],
-                                                   segments[this.segment-xSegments-1], segments[this.segment-xSegments+1], segments[this.segment+xSegments-1], segments[this.segment+xSegments+1]);
+            var checkIndices = walls.concat(segments[this.segment], segments[this.segment-1], segments[this.segment+1], segments[this.segment+xSegments], segments[this.segment-xSegments],
+                                            segments[this.segment-xSegments-1], segments[this.segment-xSegments+1], segments[this.segment+xSegments-1], segments[this.segment+xSegments+1]);
 
             // if a block has left area around current block then remove its normals
             for(var vertex1 of this.vertices) {
@@ -308,6 +306,7 @@
 
         collide(block2, vertex1, n) {
 
+            // calculate velocities after collision
             var r1     = vertex1.point;
             var r2     = subtract(add(r1, this.com), block2.com);
 
@@ -407,28 +406,19 @@
         // clear screen
         ctx.clearRect(0, 0, w, h);
 
-        // each frame, 5 physics steps and then draw
+        // reset segments array
+        var segments = segmentScreen();
 
-        for(var i=0; i<1; ++i) {
+        // move blocks by 1 step
+        for(var block of blocks) {
 
-            // sum of energy of blocks
-            // var e = 0;
+            block.step(segments);
+        }
 
-            // reset segments array
-            var segments = segmentScreen();
+        // calculate collisions
+        for(var block of blocks) {
 
-            for(var block of blocks) {
-
-                block.step(segments);
-            }
-
-            for(var block of blocks) {
-
-                block.collisionCheck(segments);
-
-                // add block's energy to total
-                // e += 1/2 * block.m * dot(block.vel, block.vel) + 1/2 * block.J * dot(block.w, block.w) + block.m*g*(h-block.com.y) || 0;
-            }
+            block.collisionCheck(segments);
         }
 
         // draw blocks
@@ -452,7 +442,7 @@
     window.addEventListener("resize", resize);
 
     // make blocks
-    var blocks = makeBlocks(400);
+    var blocks = makeBlocks(300);
     var g = 0.002; // gravitational field strength
 
     // indices of walls in blocks array
